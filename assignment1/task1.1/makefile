@@ -10,3 +10,6 @@ parsum: $(OBJ)
 
 clean:
 	rm $(OBJ) parsum
+
+test:
+	python3 "validator.task1.1.py"
