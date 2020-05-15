@@ -1,5 +1,5 @@
-CC=clang
-CFLAGS=-I.
+# CC=clang
+CFLAGS=-I. -pthread
 OBJ = parsum.o 
 
 %.o: %.c $(DEPS)
