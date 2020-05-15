@@ -34,6 +34,10 @@ int main(int argc, char const *argv[])
   for (int i = 0; i < num_threads; i++)
   {
     double step = (double)(stop - current) / (double)(num_threads - i);
+    if (step < 0.0f)
+    {
+      break;
+    }
     uint64_t end = current + step;
     ranges[i * 2] = current;
     ranges[i * 2 + 1] = end;
@@ -49,8 +53,10 @@ int main(int argc, char const *argv[])
   for (int i = 0; i < num_threads; i++)
   {
     void *result;
-    pthread_join(threads[i], &result);
-
+    if (pthread_join(threads[i], &result) != 0)
+    {
+      break;
+    }
     mpz_add(sum, sum, result);
   }
 
