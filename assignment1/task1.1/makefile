@@ -1,5 +1,5 @@
 # CC=clang
-CFLAGS=-I. -pthread
+CFLAGS=-g -lgmp -pthread -Wall
 OBJ = parsum.o 
 
 %.o: %.c $(DEPS)

@@ -1,18 +1,21 @@
+#include "gmp.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "stdint.h"
 #include "pthread.h"
 #include "math.h"
 
 void *calculate_range(void *range)
 {
+  mpz_t *sum = malloc(sizeof(mpz_t));
+  mpz_init(*sum);
+
   long start = *((long *)range);
   long stop = *((long *)range + 1);
 
-  long sum = 0;
-
   for (long i = start; i <= stop; i++)
   {
-    sum += i;
+    mpz_add_ui(*sum, *sum, i);
   }
 
   return (void *)sum;
@@ -42,23 +45,25 @@ int main(int argc, char const *argv[])
     ranges[i * 2 + 1] = end;
 
     current = end + 1;
-    int result_code = pthread_create(&threads[i], NULL, calculate_range, &ranges[i * 2]);
+
+    pthread_create(&threads[i], NULL, calculate_range, &ranges[i * 2]);
   }
 
-  long sum = 0;
+  mpz_t sum;
+  mpz_init(sum);
 
   for (int i = 0; i < num_threads; i++)
   {
     void *result;
-    int result_code = pthread_join(threads[i], &result);
-    if (result_code != 0)
+    if (pthread_join(threads[i], &result) != 0)
     {
       break;
     }
-    sum += (long)result;
+    mpz_add(sum, sum, result);
+    free(result);
   }
 
-  printf("%ld", sum);
+  mpz_out_str(stdout, 10, sum);
   free(ranges);
 
   return 0;
