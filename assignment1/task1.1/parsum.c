@@ -26,7 +26,7 @@ int main(int argc, char const *argv[])
 
   if (stop - start < num_threads)
   {
-      num_threads = stop - start + 1;
+    num_threads = stop - start + 1;
   }
 
   pthread_t threads[num_threads];
