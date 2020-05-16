@@ -14,19 +14,44 @@ _Atomic int state = RUNNING;
 _Atomic int num_philosophers;
 sem_t* forks;
 
-void request_fork(int i, int side) {
+int get_fork_id(int id, int side) {
+  if (side == LEFT) {
+    return id + (num_philosophers - 1) % num_philosophers;
+  } else {
+    return id + 1 % num_philosophers;
+  }
+}
 
+void request_fork(int id, int side) {
+  int fork_id = get_fork_id(id, side);
+  sem_wait(&forks[fork_id]);
+}
+
+void put_fork_back(int id, int side) {
+  int fork_id = get_fork_id(id, side);
+  sem_post(&forks[fork_id]);
 }
 
 void *philosopher(void *args)
 {
+  int id = *((int *) args);
+  int eat_counter = 0;
   while (state == RUNNING)
   {
-    printf("Schmeckt das jut!");
+    //Thinking
     sleep(1);
+    //Hungry
+    request_fork(id, LEFT);
+    request_fork(id, RIGHT);
+    //Eating
+    eat_counter = eat_counter + 1;
+    //Cleanup
+    put_fork_back(id, LEFT);
+    put_fork_back(id, RIGHT);
   }
-  
-  return (void *)"500";
+  char *return_val = malloc(sizeof(char) * 12);
+  sprintf(return_val, "%d", eat_counter);
+  return (void *) return_val;
 }
 
 void initialization() {
@@ -46,13 +71,14 @@ int main(int argc, char const *argv[])
   output_file = fopen("./output.txt", "w+");
   int i;
   pthread_t threads[num_philosophers];
-
+  int* phil_ids = malloc(sizeof(int) * num_philosophers);
+  initialization();
   printf("%d philosophers are eating for %d seconds\n", num_philosophers, run_time);
   for (i = 0; i < num_philosophers; i++)
   {
-
+    phil_ids[i] = i;
     pthread_create(&threads[i], NULL,
-                   philosopher, i);
+                   philosopher, &phil_ids[i]);
 
     printf("Philosopher %d is thinking\n", i + 1);
   }
@@ -66,13 +92,14 @@ int main(int argc, char const *argv[])
     void *result;
     pthread_join(threads[i], &result);
     fprintf(output_file, "%s", result);
-
+    free(result);
     if (i != num_philosophers - 1 ) {
       fprintf(output_file, ";");
     }
   }
 
   free(forks);
+  free(phil_ids);
   fclose(output_file);
   return 0;
 }
