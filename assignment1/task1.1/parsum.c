@@ -24,6 +24,11 @@ int main(int argc, char const *argv[])
   long start = atol(argv[2]);
   long stop = atol(argv[3]);
 
+  if (stop - start < num_threads)
+  {
+      num_threads = stop - start + 1;
+  }
+
   pthread_t threads[num_threads];
   long *ranges = (long *)malloc(sizeof(long) * num_threads * 2);
   long current = start;
@@ -31,10 +36,7 @@ int main(int argc, char const *argv[])
   for (int i = 0; i < num_threads; i++)
   {
     double step = (double)(stop - current) / (double)(num_threads - i);
-    if (step < 0.0f)
-    {
-      break;
-    }
+
     long end = current + step;
     ranges[i * 2] = current;
     ranges[i * 2 + 1] = end;
