@@ -7,11 +7,11 @@
 
 void *calculate_range(void *range)
 {
-  long start = *((long *)range);
-  long stop = *((long *)range + 1);
-
   mpz_t *sum = malloc(sizeof(mpz_t));
   mpz_init(*sum);
+
+  long start = *((long *)range);
+  long stop = *((long *)range + 1);
 
   for (long i = start; i <= stop; i++)
   {
@@ -60,6 +60,7 @@ int main(int argc, char const *argv[])
       break;
     }
     mpz_add(sum, sum, result);
+    free(result);
   }
 
   mpz_out_str(stdout, 10, sum);
