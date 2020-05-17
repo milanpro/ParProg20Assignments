@@ -1,5 +1,6 @@
 # CC=clang
-CFLAGS=-g -lgmp -pthread -Wall
+ERRFLAGS = -Werror -Wall -Wextra -pedantic -Wcast-align -Wcast-qual -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wstrict-overflow=5 -Wundef -Wno-unused -Wno-variadic-macros -Wno-parentheses -fdiagnostics-show-option
+CFLAGS = -lgmp -pthread $(ERRFLAGS)
 OBJ = parsum.o 
 
 %.o: %.c $(DEPS)
