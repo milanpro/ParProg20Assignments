@@ -12,29 +12,35 @@
 
 _Atomic int state = RUNNING;
 _Atomic int num_philosophers;
-sem_t* forks;
+sem_t *forks;
 
-int get_fork_id(int id, int side) {
-  if (side == LEFT) {
+int get_fork_id(int id, int side)
+{
+  if (side == LEFT)
+  {
     return (id + (num_philosophers - 1)) % num_philosophers;
-  } else {
+  }
+  else
+  {
     return (id + 1) % num_philosophers;
   }
 }
 
-void request_fork(int id, int side) {
+void request_fork(int id, int side)
+{
   int fork_id = get_fork_id(id, side);
   sem_wait(&forks[fork_id]);
 }
 
-void put_fork_back(int id, int side) {
+void put_fork_back(int id, int side)
+{
   int fork_id = get_fork_id(id, side);
   sem_post(&forks[fork_id]);
 }
 
 void *philosopher(void *args)
 {
-  int id = *((int *) args);
+  int id = *((int *)args);
   int eat_counter = 0;
   while (state == RUNNING)
   {
@@ -51,13 +57,15 @@ void *philosopher(void *args)
   }
   char *return_val = malloc(sizeof(char) * 12);
   sprintf(return_val, "%d", eat_counter);
-  return (void *) return_val;
+  return (void *)return_val;
 }
 
-void initialization() {
+void initialization()
+{
   forks = malloc(sizeof(sem_t) * num_philosophers);
 
-  for (int i = 0; i < num_philosophers; i++) {
+  for (int i = 0; i < num_philosophers; i++)
+  {
     sem_init(&forks[i], 0, 1);
   }
 }
@@ -66,7 +74,8 @@ int main(int argc, char const *argv[])
 {
   num_philosophers = 5;
   int run_time = 4;
-  if (argc == 3) {
+  if (argc == 3)
+  {
     num_philosophers = atoi(argv[1]);
     run_time = atoi(argv[2]);
   }
@@ -75,7 +84,7 @@ int main(int argc, char const *argv[])
   output_file = fopen("./output.txt", "w+");
   int i;
   pthread_t threads[num_philosophers];
-  int* phil_ids = malloc(sizeof(int) * num_philosophers);
+  int *phil_ids = malloc(sizeof(int) * num_philosophers);
   initialization();
   printf("%d philosophers are eating for %d seconds\n", num_philosophers, run_time);
   for (i = 0; i < num_philosophers; i++)
@@ -97,7 +106,8 @@ int main(int argc, char const *argv[])
     pthread_join(threads[i], &result);
     fprintf(output_file, "%s", result);
     free(result);
-    if (i != num_philosophers - 1 ) {
+    if (i != num_philosophers - 1)
+    {
       fprintf(output_file, ";");
     }
   }
