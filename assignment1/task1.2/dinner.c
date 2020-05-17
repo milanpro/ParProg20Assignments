@@ -16,9 +16,9 @@ sem_t* forks;
 
 int get_fork_id(int id, int side) {
   if (side == LEFT) {
-    return id + (num_philosophers - 1) % num_philosophers;
+    return (id + (num_philosophers - 1)) % num_philosophers;
   } else {
-    return id + 1 % num_philosophers;
+    return (id + 1) % num_philosophers;
   }
 }
 
@@ -58,14 +58,18 @@ void initialization() {
   forks = malloc(sizeof(sem_t) * num_philosophers);
 
   for (int i = 0; i < num_philosophers; i++) {
-    sem_init(&forks[i], 0, 0);
+    sem_init(&forks[i], 0, 1);
   }
 }
 
 int main(int argc, char const *argv[])
 {
-  num_philosophers = atoi(argv[1]);
-  int run_time = atoi(argv[2]);
+  num_philosophers = 5;
+  int run_time = 4;
+  if (argc == 3) {
+    num_philosophers = atoi(argv[1]);
+    run_time = atoi(argv[2]);
+  }
 
   FILE *output_file;
   output_file = fopen("./output.txt", "w+");
