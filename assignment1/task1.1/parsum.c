@@ -23,9 +23,15 @@ void *calculate_range(void *range)
 
 int main(int argc, char const *argv[])
 {
-  int num_threads = atoi(argv[1]);
-  long start = atol(argv[2]);
-  long stop = atol(argv[3]);
+  int num_threads = 32;
+  long start = 23;
+  long stop = 42;
+
+  if (argc === 4) {
+    num_threads = atoi(argv[1]);
+    start = atol(argv[2]);
+    stop = atol(argv[3]);
+  }
 
   if (stop - start < num_threads)
   {
