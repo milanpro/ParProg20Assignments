@@ -13,6 +13,7 @@
 _Atomic int state = RUNNING;
 _Atomic int num_philosophers;
 sem_t *forks;
+sem_t *waiter;
 
 int get_fork_id(int id, int side)
 {
@@ -44,11 +45,12 @@ void *philosopher(void *args)
   int eat_counter = 0;
   while (state == RUNNING)
   {
-    //Thinking
-    sleep(1);
     //Hungry
+    //ruins parallelization but works
+    sem_wait(waiter);
     request_fork(id, LEFT);
     request_fork(id, RIGHT);
+    sem_post(waiter);
     //Eating
     eat_counter = eat_counter + 1;
     //Cleanup
@@ -63,11 +65,14 @@ void *philosopher(void *args)
 void initialization()
 {
   forks = malloc(sizeof(sem_t) * num_philosophers);
+  waiter = malloc(sizeof(sem_t));
 
   for (int i = 0; i < num_philosophers; i++)
   {
     sem_init(&forks[i], 0, 1);
   }
+
+  sem_init(waiter, 0, 1);
 }
 
 int main(int argc, char const *argv[])
@@ -104,7 +109,7 @@ int main(int argc, char const *argv[])
   {
     void *result;
     pthread_join(threads[i], &result);
-    fprintf(output_file, "%s", result);
+    fprintf(output_file, "%s", (char *)result);
     free(result);
     if (i != num_philosophers - 1)
     {
