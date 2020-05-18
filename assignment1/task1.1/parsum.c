@@ -1,21 +1,21 @@
-#include "gmp.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "stdint.h"
 #include "pthread.h"
 #include "math.h"
 
+typedef __uint128_t result_type;
+
 void *calculate_range(void *range)
 {
-  mpz_t *sum = malloc(sizeof(mpz_t));
-  mpz_init(*sum);
+  result_type *sum = malloc(sizeof(result_type));
 
   long start = *((long *)range);
   long stop = *((long *)range + 1);
 
   for (long i = start; i <= stop; i++)
   {
-    mpz_add_ui(*sum, *sum, i);
+    *sum = *sum + (result_type) i;
   }
 
   return (void *)sum;
@@ -23,11 +23,11 @@ void *calculate_range(void *range)
 
 int main(int argc, char const *argv[])
 {
-  int num_threads = 32;
-  long start = 23;
-  long stop = 42;
+  int num_threads = 16;
+  long start = 1;
+  long stop = 6074001000;
 
-  if (argc === 4) {
+  if (argc == 4) {
     num_threads = atoi(argv[1]);
     start = atol(argv[2]);
     stop = atol(argv[3]);
@@ -55,8 +55,7 @@ int main(int argc, char const *argv[])
     pthread_create(&threads[i], NULL, calculate_range, &ranges[i * 2]);
   }
 
-  mpz_t sum;
-  mpz_init(sum);
+  result_type sum = 0;
 
   for (int i = 0; i < num_threads; i++)
   {
@@ -65,11 +64,27 @@ int main(int argc, char const *argv[])
     {
       break;
     }
-    mpz_add(sum, sum, result);
+    sum = sum + *((result_type *) result);
     free(result);
   }
 
-  mpz_out_str(stdout, 10, sum);
+    char arr[39];
+    char basechars[] = "0123456789";
+    int length = 0;
+    while (sum != 0) {
+        int radix;
+        radix = sum % 10;
+        sum = sum / 10;
+        arr[length++] = basechars[radix];
+    }
+    if (length == 0) {
+        printf("0");
+    }
+    else {
+        while (length--)
+            printf("%c", arr[length]);
+    }
+
   free(ranges);
 
   return 0;
