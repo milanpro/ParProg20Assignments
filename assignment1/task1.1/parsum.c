@@ -15,7 +15,7 @@ void *calculate_range(void *range)
 
   for (long i = start; i <= stop; i++)
   {
-    *sum = *sum + (result_type) i;
+    *sum = *sum + (result_type)i;
   }
 
   return (void *)sum;
@@ -27,7 +27,8 @@ int main(int argc, char const *argv[])
   long start = 1;
   long stop = 6074001000;
 
-  if (argc == 4) {
+  if (argc == 4)
+  {
     num_threads = atoi(argv[1]);
     start = atol(argv[2]);
     stop = atol(argv[3]);
@@ -64,26 +65,29 @@ int main(int argc, char const *argv[])
     {
       break;
     }
-    sum = sum + *((result_type *) result);
+    sum = sum + *((result_type *)result);
     free(result);
   }
 
-    char arr[39];
-    char basechars[] = "0123456789";
-    int length = 0;
-    while (sum != 0) {
-        int radix;
-        radix = sum % 10;
-        sum = sum / 10;
-        arr[length++] = basechars[radix];
-    }
-    if (length == 0) {
-        printf("0");
-    }
-    else {
-        while (length--)
-            printf("%c", arr[length]);
-    }
+  char arr[39];
+  char basechars[] = "0123456789";
+  int length = 0;
+  while (sum != 0)
+  {
+    int radix;
+    radix = sum % 10;
+    sum = sum / 10;
+    arr[length++] = basechars[radix];
+  }
+  if (length == 0)
+  {
+    printf("0");
+  }
+  else
+  {
+    while (length--)
+      printf("%c", arr[length]);
+  }
 
   free(ranges);
 
