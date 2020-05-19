@@ -13,6 +13,14 @@ double *dest;
 
 struct hotspot *hotspot_list;
 
+struct coord
+{
+  int x;
+  int y;
+
+  struct coord *next_coord;
+};
+
 struct dest_target
 {
   int x;
