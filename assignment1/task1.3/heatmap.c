@@ -157,11 +157,11 @@ void *worker(void *args)
   struct dest_target *target = (struct dest_target *)args;
   double acc = 0;
 
-  for (int x = target->x - 1; x < target->x + 1; x++)
+  for (int x = -1; x <= 1; x++)
   {
-    for (int y = target->y - 1; y < target->y + 1; y++)
+    for (int y = -1; y <= 1; y++)
     {
-      acc += get_value(src, x, y);
+      acc += get_value(src, x + target->x, y + target->y);
     }
   }
 
@@ -178,7 +178,7 @@ int main(int argc, char const *argv[])
   height = 20;
   int rounds = 32;
   const char *hotspots_filename = "test_hotspots.csv";
-  const char *coords_filename = ""; //"test_coords.csv";
+  const char *coords_filename = NULL; //"test_coords.csv";
 
   if (argc != 1)
   {
@@ -192,7 +192,7 @@ int main(int argc, char const *argv[])
     }
     else
     {
-      coords_filename = "";
+      coords_filename = NULL;
     }
   }
 
@@ -243,7 +243,7 @@ int main(int argc, char const *argv[])
     src = temp;
   }
 
-  if(strcmp(coords_filename, "") != 0)
+  if(coords_filename != NULL)
     write_results_coords(coords_filename);
   else
     write_results();
