@@ -2,6 +2,7 @@
     "files.associations": {
         "functional": "c",
         "sstream": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "bitset": "c"
     }
 }
