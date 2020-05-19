@@ -40,7 +40,7 @@ void initialize(const char *hotspots_filename)
 
 double get_value(double *from, int x, int y)
 {
-  if ((x < 0 || x > width) || (y < 0 || y > height))
+  if ((x < 0 || x >= width) || (y < 0 || y >= height))
   {
     return 0;
   }
@@ -109,7 +109,7 @@ void write_results()
   {
     for (int x = 0; x < width; x++)
     {
-      double value = get_value(dest, x, y);
+      double value = get_value(src, x, y);
 
       if (value > 0.9)
       {
@@ -118,17 +118,17 @@ void write_results()
       else
       {
         value += 0.09;
-        char output[4];
+        char output[50];
 
-        snprintf(output, 50, "%.2f", value);
-        if (value > 0.1)
-          printf("Value: %.2f Character: %c\n", value, output[2]);
+        snprintf(output, 50, "%f", value);
         fprintf (fp, "%c", output[2]);
       }
     }
 
     fprintf(fp, "\n");
   }
+
+  fprintf(fp, "\n");
 
   fclose (fp);
 }
@@ -143,7 +143,7 @@ void write_results_coords(const char *coords_filename)
   struct coord* last_coord = coord_list;
   while (last_coord != NULL)
   {
-    double value = get_value(dest, last_coord->x, last_coord->y);
+    double value = get_value(src, last_coord->x, last_coord->y);
 
     fprintf (fp, "%.4f\n", value);
     last_coord = last_coord->next_coord;
@@ -200,20 +200,20 @@ int main(int argc, char const *argv[])
 
   pthread_t threads[width * height];
 
+  struct hotspot *last_hotspot = hotspot_list;
+  while (last_hotspot != NULL)
+  {
+    if (0 >= last_hotspot->startround && 0 < last_hotspot->endround)
+    {
+      set_value(src, last_hotspot->x, last_hotspot->y, 1.0f);
+    }
+
+    last_hotspot = last_hotspot->next_hotspot;
+  }
+
   for (int i = 0; i < rounds; i++)
   {
     printf("Round: %d/%d starting...\n", i, rounds);
-
-    struct hotspot *last_hotspot = hotspot_list;
-    while (last_hotspot != NULL)
-    {
-      if (i >= last_hotspot->startround && i < last_hotspot->endround)
-      {
-        set_value(src, last_hotspot->x, last_hotspot->y, 1.0f);
-      }
-
-      last_hotspot = last_hotspot->next_hotspot;
-    }
 
     for (int x = 0; x < width; x++)
     {
@@ -233,6 +233,17 @@ int main(int argc, char const *argv[])
       {
         pthread_join(threads[width * y + x], NULL);
       }
+    }
+
+    last_hotspot = hotspot_list;
+    while (last_hotspot != NULL)
+    {
+      if (i >= last_hotspot->startround && i < last_hotspot->endround)
+      {
+        set_value(dest, last_hotspot->x, last_hotspot->y, 1.0f);
+      }
+
+      last_hotspot = last_hotspot->next_hotspot;
     }
 
     printf("Round: %d/%d done\n", i, rounds);
