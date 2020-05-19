@@ -3,7 +3,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "unistd.h"
-#include "math.h"
+#include "csv.h"
 
 int width;
 int height;
@@ -11,25 +11,7 @@ int height;
 double *src;
 double *dest;
 
-struct hotspot
-{
-  int x;
-  int y;
-  // inclusive
-  int startround;
-  // exclusive
-  int endround;
-  struct hotspot* next_hotspot;
-};
-
-struct coord
-{
-  int x;
-  int y;
-  struct coord* next_coord;
-};
-
-struct hotspot* hotspot_list;
+struct hotspot *hotspot_list;
 
 struct dest_target
 {
@@ -45,56 +27,13 @@ void initialize(const char *hotspots_filename)
   dest = malloc(sizeof(double) * width * height);
   targets = malloc(sizeof(struct dest_target) * width * height);
 
-  FILE *fp;
-  char *line = NULL;
-  size_t len = 0;
-  ssize_t read;
-
-  fp = fopen(hotspots_filename, "r");
-
-  if (fp == NULL)
-  {
-    exit(EXIT_FAILURE);
-  }
-
-  int return_code = getline(&line, &len, fp);
-  if (return_code == -1) {
-    exit(EXIT_FAILURE);
-  }
-
-  char *token;
-  struct hotspot* last_hotspot = NULL;
-  struct hotspot* new_hotspot = NULL;
-  while (getline(&line, &len, fp) != -1)
-  {
-    if (last_hotspot == NULL) {
-      hotspot_list = malloc(sizeof(struct hotspot));
-      new_hotspot = hotspot_list;
-    } else {
-      new_hotspot = malloc(sizeof(struct hotspot));
-      last_hotspot->next_hotspot = new_hotspot;
-    }
-    token = strtok(line, ",");
-    new_hotspot->x = atoi(token);
-    token = strtok(NULL, ",");
-    new_hotspot->y = atoi(token);
-    token = strtok(NULL, ",");
-    new_hotspot->startround = atoi(token);
-    token = strtok(NULL, ",");
-    new_hotspot->endround = atoi(token);
-    new_hotspot->next_hotspot = NULL;
-
-    last_hotspot = new_hotspot;
-  }
-
-  fclose(fp);
-  if (line)
-    free(line);
+  hotspot_list = parse_hotspot_list(hotspots_filename);
 }
 
 double get_value(double *from, int x, int y)
 {
-  if ((x < 0 || x > width) || (y < 0 || y > height)) {
+  if ((x < 0 || x > width) || (y < 0 || y > height))
+  {
     return 0;
   }
 
@@ -257,9 +196,11 @@ int main(int argc, char const *argv[])
   {
     printf("Round: %d/%d starting...\n", i, rounds);
 
-    struct hotspot* last_hotspot = hotspot_list;
-    while (last_hotspot != NULL) {
-      if (i >= last_hotspot->startround && i < last_hotspot->endround) {
+    struct hotspot *last_hotspot = hotspot_list;
+    while (last_hotspot != NULL)
+    {
+      if (i >= last_hotspot->startround && i < last_hotspot->endround)
+      {
         set_value(src, last_hotspot->x, last_hotspot->y, 1.0f);
       }
 
@@ -285,6 +226,8 @@ int main(int argc, char const *argv[])
         pthread_join(threads[width * y + x], NULL);
       }
     }
+
+    printf("Round: %d/%d done\n", i, rounds);
 
     //Swapping src into dest and the other way round
     double *temp = dest;
