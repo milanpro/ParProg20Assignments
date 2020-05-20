@@ -3,6 +3,9 @@
         "functional": "c",
         "sstream": "c",
         "cstdlib": "c",
-        "bitset": "c"
+        "bitset": "c",
+        "thread": "cpp",
+        "chrono": "cpp",
+        "algorithm": "cpp"
     }
 }
