@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <thread>
 #include <mutex>
 #include <random>
@@ -105,6 +106,8 @@ int main(int argc, char *argv[])
 
   double pi = 4 * (double)in_circle_acc / (double)point_count;
 
+  std::cout << std::fixed;
+  std::cout << std::setprecision(15);
   std::cout << "PI: " << pi << "\n";
 
   return 0;
