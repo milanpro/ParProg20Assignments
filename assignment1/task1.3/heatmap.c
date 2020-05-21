@@ -210,9 +210,5 @@ int main(int argc, char const *argv[])
     write_results();
   }
 
-  double test = 0.099458846368916858;
-  printf("%f\n", test);
-  printf("%.4f\n", test);
-
   return 0;
 }
