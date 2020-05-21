@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     threads[i] = std::thread(monte_carlo_worker, thread_points, std::move(in_circle_promises[i]));
   }
 
-  int in_circle_acc = 0;
+  uint64_t in_circle_acc = 0;
   for (int i = 0; i < thread_count; i++)
   {
     threads[i].join();
@@ -72,7 +72,9 @@ int main(int argc, char *argv[])
     }
   }
 
-  std::cout << "foo\n";
+  double pi = 4 * (double)in_circle_acc / (double)point_count;
+
+  std::cout << "PI: " << pi << "\n";
 
   return 0;
 }
