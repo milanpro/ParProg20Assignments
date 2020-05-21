@@ -1,8 +1,8 @@
-#include "stdio.h"
-#include "pthread.h"
-#include "stdlib.h"
-#include "string.h"
-#include "unistd.h"
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include "csv.h"
 
 int width;
@@ -12,14 +12,6 @@ double *src;
 double *dest;
 
 struct hotspot *hotspot_list;
-
-struct coord
-{
-  int x;
-  int y;
-
-  struct coord *next_coord;
-};
 
 struct dest_target
 {
@@ -53,57 +45,10 @@ void set_value(double *from, int x, int y, double value)
   from[width * y + x] = value;
 }
 
-struct coord *read_coords(const char *coords_filename)
-{
-  struct coord* coord_list;
-
-  FILE *fp;
-  fp = fopen(coords_filename, "r");
-  char *line = NULL;
-  size_t len = 0;
-
-  if (fp == NULL)
-  {
-    exit(EXIT_FAILURE);
-  }
-
-  int return_code = getline(&line, &len, fp);
-  if (return_code == -1) {
-    exit(EXIT_FAILURE);
-  }
-
-  char *token;
-  struct coord* last_coord = NULL;
-  struct coord* new_coord = NULL;
-  while (getline(&line, &len, fp) != -1)
-  {
-    if (last_coord == NULL) {
-      coord_list = malloc(sizeof(struct coord));
-      new_coord = coord_list;
-    } else {
-      new_coord = malloc(sizeof(struct coord));
-      last_coord->next_coord = new_coord;
-    }
-    token = strtok(line, ",");
-    new_coord->x = atoi(token);
-    token = strtok(NULL, ",");
-    new_coord->y = atoi(token);
-    new_coord->next_coord = NULL;
-
-    last_coord = new_coord;
-  }
-
-  fclose(fp);
-  if (line)
-    free(line);
-
-  return coord_list;
-}
-
 void write_results()
 {
-  FILE * fp;
-  fp = fopen ("output.txt", "w");
+  FILE *fp;
+  fp = fopen("output.txt", "w");
 
   for (int y = 0; y < height; y++)
   {
@@ -113,7 +58,7 @@ void write_results()
 
       if (value > 0.9)
       {
-        fprintf (fp, "X");
+        fprintf(fp, "X");
       }
       else
       {
@@ -121,7 +66,7 @@ void write_results()
         char output[50];
 
         snprintf(output, 50, "%f", value);
-        fprintf (fp, "%c", output[2]);
+        fprintf(fp, "%c", output[2]);
       }
     }
 
@@ -130,26 +75,26 @@ void write_results()
 
   fprintf(fp, "\n");
 
-  fclose (fp);
+  fclose(fp);
 }
 
 void write_results_coords(const char *coords_filename)
 {
-  struct coord* coord_list = read_coords(coords_filename);
+  struct coord *coord_list = read_coords(coords_filename);
 
-  FILE * fp;
-  fp = fopen ("output.txt", "w");
+  FILE *fp;
+  fp = fopen("output.txt", "w");
 
-  struct coord* last_coord = coord_list;
+  struct coord *last_coord = coord_list;
   while (last_coord != NULL)
   {
     double value = get_value(src, last_coord->x, last_coord->y);
 
-    fprintf (fp, "%.4f\n", value);
+    fprintf(fp, "%.4f\n", value);
     last_coord = last_coord->next_coord;
   }
 
-  fclose (fp);
+  fclose(fp);
 }
 
 void *worker(void *args)
@@ -254,10 +199,13 @@ int main(int argc, char const *argv[])
     src = temp;
   }
 
-  if(coords_filename != NULL)
+  if (coords_filename != NULL)
+  {
     write_results_coords(coords_filename);
+  }
   else
+  {
     write_results();
-
+  }
   return 0;
 }

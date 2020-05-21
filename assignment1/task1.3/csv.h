@@ -16,4 +16,12 @@ struct hotspot
     struct hotspot *next_hotspot;
 };
 
+struct coord
+{
+    int x;
+    int y;
+    struct coord *next_coord;
+};
+
 struct hotspot *parse_hotspot_list(const char *hotspots_filename);
+struct coord *read_coords(const char *coords_filename);
