@@ -23,9 +23,9 @@ struct dest_target *targets;
 
 void initialize(const char *hotspots_filename)
 {
-  src = malloc(sizeof(double) * width * height);
-  dest = malloc(sizeof(double) * width * height);
-  targets = malloc(sizeof(struct dest_target) * width * height);
+  src = calloc(width * height, sizeof(double));
+  dest = calloc(width * height, sizeof(double));
+  targets = calloc(width * height, sizeof(struct dest_target));
 
   hotspot_list = parse_hotspot_list(hotspots_filename);
 }
@@ -62,8 +62,8 @@ void write_results()
       }
       else
       {
-        value += 0.09;
         char output[50];
+        value += 0.09;
 
         snprintf(output, 50, "%f", value);
         fprintf(fp, "%c", output[2]);
@@ -141,6 +141,8 @@ int main(int argc, char const *argv[])
     }
   }
 
+  printf("Width: %d Height: %d Rounds: %d\n", width, height, rounds);
+
   initialize(hotspots_filename);
 
   pthread_t threads[width * height];
@@ -183,7 +185,7 @@ int main(int argc, char const *argv[])
     last_hotspot = hotspot_list;
     while (last_hotspot != NULL)
     {
-      if (i >= last_hotspot->startround && i < last_hotspot->endround)
+      if (i + 1 >= last_hotspot->startround && i + 1 < last_hotspot->endround)
       {
         set_value(dest, last_hotspot->x, last_hotspot->y, 1.0f);
       }
@@ -207,5 +209,10 @@ int main(int argc, char const *argv[])
   {
     write_results();
   }
+
+  double test = 0.099458846368916858;
+  printf("%f\n", test);
+  printf("%.4f\n", test);
+
   return 0;
 }
