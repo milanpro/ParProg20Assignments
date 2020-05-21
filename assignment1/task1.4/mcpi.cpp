@@ -1,5 +1,6 @@
 #include <iostream>
 #include <thread>
+#include <mutex>
 #include <random>
 #include <future>
 
@@ -13,6 +14,9 @@ enum Strategy
 Strategy execution_strategy;
 
 std::atomic<int> circle_points_atomic;
+
+std::mutex m;
+int circle_points_global;
 
 bool in_circle(double x, double y)
 {
@@ -37,6 +41,10 @@ void monte_carlo_worker(uint64_t npoints, std::promise<uint64_t> &&result)
           circle_points++;
           break;
         case Strategy::SYNC:
+          {
+            std::lock_guard<std::mutex> lockGuard(m);
+            circle_points_global++;
+          }
           break;
         default:
           circle_points_atomic++;
@@ -54,6 +62,7 @@ int main(int argc, char *argv[])
   int thread_count = atoi(argv[2]);
   execution_strategy = static_cast<Strategy>(atoi(argv[3]));
   circle_points_atomic = 0;
+  circle_points_global = 0;
 
   std::thread threads[thread_count];
   std::promise<uint64_t> in_circle_promises[thread_count];
@@ -88,6 +97,10 @@ int main(int argc, char *argv[])
   if (execution_strategy == Strategy::ATOMIC)
   {
     in_circle_acc = circle_points_atomic;
+  }
+  else if (execution_strategy == Strategy::SYNC)
+  {
+    in_circle_acc = circle_points_global;
   }
 
   double pi = 4 * (double)in_circle_acc / (double)point_count;
