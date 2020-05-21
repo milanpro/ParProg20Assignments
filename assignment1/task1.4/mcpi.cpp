@@ -12,6 +12,8 @@ enum Strategy
 
 Strategy execution_strategy;
 
+std::atomic<int> circle_points_atomic;
+
 bool in_circle(double x, double y)
 {
   return (x * x) + (y * y) <= 1.0f;
@@ -29,7 +31,17 @@ void monte_carlo_worker(uint64_t npoints, std::promise<uint64_t> &&result)
   {
     if (in_circle(dist(generator), dist(generator)))
     {
-      circle_points++;
+      switch (execution_strategy)
+      {
+        case Strategy::LOCAL:
+          circle_points++;
+          break;
+        case Strategy::SYNC:
+          break;
+        default:
+          circle_points_atomic++;
+          break;
+      }
     }
   }
 
@@ -41,6 +53,7 @@ int main(int argc, char *argv[])
   uint64_t point_count = atoll(argv[1]);
   int thread_count = atoi(argv[2]);
   execution_strategy = static_cast<Strategy>(atoi(argv[3]));
+  circle_points_atomic = 0;
 
   std::thread threads[thread_count];
   std::promise<uint64_t> in_circle_promises[thread_count];
@@ -70,6 +83,11 @@ int main(int argc, char *argv[])
     {
       in_circle_acc += in_circle_futures[i].get();
     }
+  }
+
+  if (execution_strategy == Strategy::ATOMIC)
+  {
+    in_circle_acc = circle_points_atomic;
   }
 
   double pi = 4 * (double)in_circle_acc / (double)point_count;
