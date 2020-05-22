@@ -6,6 +6,7 @@
         "bitset": "c",
         "thread": "cpp",
         "chrono": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "random": "cpp"
     }
 }

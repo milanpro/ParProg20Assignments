@@ -38,18 +38,18 @@ void monte_carlo_worker(uint64_t npoints, std::promise<uint64_t> &&result)
     {
       switch (execution_strategy)
       {
-        case Strategy::LOCAL:
-          circle_points++;
-          break;
-        case Strategy::SYNC:
-          {
-            std::lock_guard<std::mutex> lockGuard(m);
-            circle_points_global++;
-          }
-          break;
-        default:
-          circle_points_atomic++;
-          break;
+      case Strategy::LOCAL:
+        circle_points++;
+        break;
+      case Strategy::SYNC:
+      {
+        std::lock_guard<std::mutex> lockGuard(m);
+        circle_points_global++;
+      }
+      break;
+      default:
+        circle_points_atomic++;
+        break;
       }
     }
   }
