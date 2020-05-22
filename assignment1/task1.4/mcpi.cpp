@@ -24,10 +24,9 @@ bool in_circle(double x, double y)
   return (x * x) + (y * y) <= 1.0f;
 }
 
-void monte_carlo_worker(uint64_t npoints, std::promise<uint64_t> &&result)
+void monte_carlo_worker(int thread_id, uint64_t npoints, std::promise<uint64_t> &&result)
 {
-  std::hash<std::thread::id> hasher;
-  std::mt19937 generator(hasher(std::this_thread::get_id()));
+  std::mt19937 generator(thread_id);
   std::uniform_real_distribution<double> dist(0.0, 1.0);
 
   uint64_t circle_points = 0;
@@ -82,7 +81,7 @@ int main(int argc, char *argv[])
     {
       thread_points += remainder;
     }
-    threads[i] = std::thread(monte_carlo_worker, thread_points, std::move(in_circle_promises[i]));
+    threads[i] = std::thread(monte_carlo_worker, i, thread_points, std::move(in_circle_promises[i]));
   }
 
   uint64_t in_circle_acc = 0;
