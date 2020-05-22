@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 
   std::cout << std::fixed;
   std::cout << std::setprecision(15);
-  std::cout << "PI: " << pi << "\n";
+  std::cout << pi << "\n";
 
   return 0;
 }
