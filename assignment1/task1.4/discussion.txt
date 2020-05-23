@@ -1,0 +1,16 @@
+1. What can you observe from your Q-series?
+The synchronized strategy shows by far the worst scaling, for more than two cores the Karp-Flatt-Metric is even larger
+than 1, meaning the program is slower despite using more cores. The local aggregation seems to scale better than the
+atomic global variable, but both still have a rather low sequential fraction.
+
+2. Did you find parallelization overhead? What might cause/prevent it?
+Parallelization overhead is most obvious for the synchronized strategy, where execution even slows down as more threads
+are added. This is probably due to synchronization being very complex in relation to the problem itself. For the other
+strategies, execution times reach a low point around 8 threads, which is is due to the test machine only having 8 cores.
+In this situation, any additional threads do not help utilize the CPUs resources and only increase overhead.
+
+3. Which external factors can influence your measurements?
+Of course the mcpi program is not the only process running on the system, despite attempts to minimize interference,
+other programs might take away resources from mcpi. Also, modern CPUs do not necessarily deliver constant performance
+for longer workloads, because they dynamically adjust frequencies based on temperatures and power consumption. Both
+factors might impact the results.
