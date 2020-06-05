@@ -12,4 +12,4 @@ clean:
 	rm $(OBJ) heatmap
 
 test:
-	python3 "validator.task1.3.py"
+	python3 "validator.task2.1.py"
