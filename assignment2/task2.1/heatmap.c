@@ -19,7 +19,6 @@ void initialize(const char *hotspots_filename)
 {
   src = calloc(width * height, sizeof(double));
   dest = calloc(width * height, sizeof(double));
-  ranges = calloc(core_count, sizeof(struct task_range));
 
   hotspot_list = parse_hotspot_list(hotspots_filename);
 }
