@@ -2,13 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/sysinfo.h>
 #include "csv.h"
 #include <omp.h>
 
 int width;
 int height;
-int core_count;
 
 double *src;
 double *dest;
@@ -128,8 +126,6 @@ int main(int argc, char const *argv[])
   int rounds = 32;
   const char *hotspots_filename = "test_hotspots.csv";
   const char *coords_filename = NULL; //"test_coords.csv";
-
-  core_count = get_nprocs();
 
   if (argc != 1)
   {
