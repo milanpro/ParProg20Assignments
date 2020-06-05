@@ -15,36 +15,6 @@ double *dest;
 
 struct hotspot *hotspot_list;
 
-struct task_range
-{
-  int start_x;
-  int start_y;
-
-  int count;
-};
-
-struct task_range *ranges;
-
-void assign_ranges()
-{
-  int x = 0, y = 0;
-  int current = 0;
-  int total = width * height;
-  
-  for (int i = 0; i < core_count; i++)
-  {
-    ranges[i].start_x = x;
-    ranges[i].start_y = y;
-
-    int step = (int) ((double)(total - current) / (double)(core_count - i));
-    ranges[i].count = step;
-    current += step;
-
-    y += (x + step) / width;
-    x = (x + step) % width;
-  }
-}
-
 void initialize(const char *hotspots_filename)
 {
   src = calloc(width * height, sizeof(double));
@@ -52,7 +22,6 @@ void initialize(const char *hotspots_filename)
   ranges = calloc(core_count, sizeof(struct task_range));
 
   hotspot_list = parse_hotspot_list(hotspots_filename);
-  assign_ranges();
 }
 
 double get_value(double *from, int x, int y)
