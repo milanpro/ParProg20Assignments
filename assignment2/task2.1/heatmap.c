@@ -149,8 +149,6 @@ int main(int argc, char const *argv[])
 
   for (int i = 0; i < rounds; i++)
   {
-    printf("Round: %d/%d starting...\n", i, rounds);
-
     #pragma omp parallel for collapse(2)
     for (int x = 0; x < width; x++)
     {
@@ -159,8 +157,6 @@ int main(int argc, char const *argv[])
         compute_point(x, y);
       }
     }
-
-    printf("Round: %d/%d done\n", i, rounds);
 
     //Swapping src into dest and the other way round
     double *temp = dest;
