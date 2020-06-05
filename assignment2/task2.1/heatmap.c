@@ -155,12 +155,9 @@ int main(int argc, char const *argv[])
   {
     printf("Round: %d/%d starting...\n", i, rounds);
 
-    #pragma omp parallel for
+    #pragma omp parallel for collapse(2)
     for (int x = 0; x < width; x++)
     {
-
-      printf("Thread number: %d, x: %d\n", omp_get_thread_num(), x);
-
       for (int y = 0; y < height; y++)
       {
         compute_point(x, y);
