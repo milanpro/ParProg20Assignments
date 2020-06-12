@@ -1,7 +1,9 @@
+#include <crypt.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <crypt.h>
+#include <omp.h>
+
 
 std::vector<std::string> usernames;
 std::vector<std::string> salts;
@@ -47,30 +49,42 @@ int main(int argc, char *argv[])
   read_passwds(passwd_filename);
   read_dictionary(dict_filename);
 
-  std::string exact_match;
-  std::string digit_match;
-  int found = 0;
+  std::vector<std::string> matches;
 
-  for (int i = 0; i < hashes.size() && found < 1; i++)
+  std::vector<std::string> attachments = {"", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+
+  #pragma omp parallel for
+  for (size_t i = 0; i < hashes.size(); i++)
   {
-    for (int j = 0; j < dictionary.size(); j++)
+    // Can't use break inside an OMP for loop
+    if (matches.size() >= 2)
     {
-      struct crypt_data data;
-      data.initialized = 0;
+      continue;
+    }
 
-      // crypt_r is threadsafe, crypt is not!
-      std::string hash = crypt_r(dictionary[j].c_str(), salts[i].c_str(), &data);
-
-      if (hash == hashes[i])
+    for (size_t j = 0; j < dictionary.size(); j++)
+    {
+      for (size_t att = 0; att < attachments.size(); att++)
       {
-        exact_match = usernames[i] + ";" + dictionary[j];
-        found++;
-        break;
+        struct crypt_data data;
+        data.initialized = 0;
+
+        // crypt_r is threadsafe, crypt is not!
+        std::string hash = crypt_r((dictionary[j] + attachments[att]).c_str(), salts[i].c_str(), &data);
+
+        if (hash == hashes[i])
+        {
+          matches.push_back(usernames[i] + ";" + dictionary[j] + attachments[att]);
+          break;
+        }
       }
     }
   }
 
-  std::cout << exact_match << "\n";
+  for (size_t i = 0; i < matches.size(); i++)
+  {
+    std::cout << matches[i] << std::endl;
+  }
   
   return 0;
 }
