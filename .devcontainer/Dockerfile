@@ -22,7 +22,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     #
     # Install C++ tools
-    && apt-get -y install build-essential cmake cppcheck valgrind \
+    && apt-get -y install build-essential cmake cppcheck valgrind libssl-dev \
     #
     # [Optional] Update UID/GID if needed
     && if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then \

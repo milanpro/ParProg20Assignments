@@ -3,6 +3,9 @@
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
+#include <iostream>
+#include <sstream>
 
 void generateBlock(std::vector<unsigned char> &mask, int index)
 {
@@ -29,22 +32,31 @@ unsigned char *compute_hash(std::vector<unsigned char> &block)
 
 int main(int argc, char const *argv[])
 {
-    std::vector<unsigned char> mask{0xc0, 0xff, 0xee};
-
-    generateBlock(mask, 0);
-    generateBlock(mask, 1);
-
     if (argc < 3)
     {
         return -1;
     }
-    int init_block = atoi(argv[1]);
-    int num_blocks = atoi(argv[2]);
+    std::stringstream hexstream;
+    std::string hex(argv[1]);
+    std::vector<unsigned char> mask;
+    unsigned int buffer;
+    unsigned int offset = 0;
+    while (offset < hex.length()) {
+        hexstream.clear();
+        hexstream << std::hex << hex.substr(offset, 2);
+        hexstream >> buffer;
+        mask.push_back(static_cast<unsigned char>(buffer));
+        offset += 2;
+    }
+    int num_blocks = std::atoi(argv[2]);
     int *queried_indices = new int[argc - 3];
     for (int i = 3; i < argc; i++)
     {
-        queried_indices[i - 3] = atoi(argv[i]);
+        queried_indices[i - 3] = std::atoi(argv[i]);
     }
-    /* code */
+
+    for (int i = 0; i < num_blocks; i++) {
+        generateBlock(mask, i);
+    }
     return 0;
 }

@@ -15,6 +15,23 @@
       "options": {
         "cwd": "/usr/bin"
       }
+    },
+    {
+      "type": "shell",
+      "label": "build-cpp",
+      "command": "/usr/bin/g++-8",
+      "args": [
+				"-pthread",
+        "-lcrypto",
+        "-fopenmp",
+        "-g",
+        "${file}",
+        "-o",
+        "${fileDirname}/${fileBasenameNoExtension}"
+      ],
+      "options": {
+        "cwd": "/usr/bin"
+      }
     }
   ]
 }
