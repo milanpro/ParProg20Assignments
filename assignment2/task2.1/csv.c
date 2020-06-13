@@ -58,7 +58,7 @@ struct hotspot *parse_hotspot_list(const char *hotspots_filename)
 
 struct coord *read_coords(const char *coords_filename)
 {
-    struct coord *coord_list;
+    struct coord *coord_list = malloc(sizeof(struct coord));
 
     FILE *fp;
     fp = fopen(coords_filename, "r");
@@ -83,7 +83,6 @@ struct coord *read_coords(const char *coords_filename)
     {
         if (last_coord == NULL)
         {
-            coord_list = malloc(sizeof(struct coord));
             new_coord = coord_list;
         }
         else
