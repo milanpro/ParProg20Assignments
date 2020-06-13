@@ -1,4 +1,4 @@
-	.file	"experiment_a.c"
+	.file	"experiment_c.c"
 	.text
 	.p2align 4,,15
 	.globl	benchmark
@@ -8,14 +8,14 @@ benchmark:
 	.cfi_startproc
 	.p2align 4,,10
 	.p2align 3
-.L3:
-	movabsq	$100000000000, %rax
-	.p2align 4,,10
-	.p2align 3
 .L2:
-	subq	$1, %rax
-	jne	.L2
-	jmp	.L3
+#APP
+# 6 "experiment_c.c" 1
+	addl $0x1, %eax
+subl $0x1, %eax
+# 0 "" 2
+#NO_APP
+	jmp	.L2
 	.cfi_endproc
 .LFE0:
 	.size	benchmark, .-benchmark
