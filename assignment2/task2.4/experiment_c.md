@@ -1,0 +1,2 @@
+Using only CPU Registers like eax leads to minimal wait time for resources like memory and therefore the time wasted with stalled cpu cylces in the backend is reduced. _stalled-cycles-backend_ count is very low and around 1% the reason for idle time.
+Since the metric is not that stable it got removed on newer cpus and therefore also hard to measure.
