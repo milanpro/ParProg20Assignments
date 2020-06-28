@@ -4,8 +4,6 @@
 #include <iostream>
 #include <numeric>
 
-#define BLOCK_SIZE 256 // multiple of 32
-
 __global__ void sum(int *output, int chunkSize, int numThreads, int start, int stop)
 {
     int index = (threadIdx.x + blockIdx.x * blockDim.x);
