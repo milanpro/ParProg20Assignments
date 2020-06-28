@@ -4,20 +4,28 @@
 #include <iostream>
 #include <numeric>
 
-__global__ void sum(int *input)
+#define BLOCK_SIZE 256 // multiple of 32
+
+__global__ void sum(int *output, int chunkSize, int numThreads, int start, int stop)
 {
-    const int tid = threadIdx.x;
+    int index = (threadIdx.x + blockIdx.x * blockDim.x);
+    int result = 0;
+    int startNum = start + (index * chunkSize);
+    for (int i = startNum; i < stop && i < (startNum + chunkSize); i++) {
+        result += i;
+    }
+
+    output[index] = result
 
     auto step_size = 1;
-    int number_of_threads = blockDim.x;
-
+    int number_of_threads = numThreads;
     while (number_of_threads > 0)
     {
-        if (tid < number_of_threads) // still alive?
+        if (index < number_of_threads) // still alive?
         {
-            const auto fst = tid * step_size * 2;
-            const auto snd = fst + step_size;
-            input[fst] += input[snd];
+            const auto first = index * step_size * 2;
+            const auto second = first + step_size;
+            input[first] += input[second];
         }
 
         step_size <<= 1;
@@ -26,17 +34,32 @@ __global__ void sum(int *input)
 }
 
 int main(int argc, char const *argv[])
-{   
-    const auto count = 8;
-    const int size = count * sizeof(int);
-    int h[] = {13, 27, 15, 14, 33, 2, 24, 6};
+{
+    long start = 1;
+    long stop = 6074001000;
+  
+    if (argc == 3)
+    {
+      start = atol(argv[1]);
+      stop = atol(argv[2]);
+    }
+
+    int blockSize;      // The launch configurator returned block size 
+    int minGridSize;    // The minimum grid size needed to achieve the maximum occupancy for a full device launch 
+
+    cudaOccupancyMaxPotentialBlockSize(&minGridSize, &blockSize, sum, 0, 0); 
+
+    int numThreads = minGridSize * blockSize;
+    int chunkSize = (stop - start) / numThreads;
+
+    const int size = numThreads * sizeof(int);
 
     int *d;
 
     cudaMalloc(&d, size);
-    cudaMemcpy(d, h, size, cudaMemcpyHostToDevice);
+    cudaMemset(d, 0, size);
 
-    sum<<<1, count / 2>>>(d);
+    sum<<<1, count / 2>>>(d, chunkSize, numThreads, start, stop);
 
     int result;
     cudaMemcpy(&result, d, sizeof(int), cudaMemcpyDeviceToHost);
