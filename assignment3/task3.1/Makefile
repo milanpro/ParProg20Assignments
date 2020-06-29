@@ -256,7 +256,7 @@ LIBRARIES :=
 ################################################################################
 
 # Gencode arguments
-SMS ?= 30 35 37 50 52 60 61 70 75
+SMS ?= 30 35 37 50 52 60 61 70 72 75
 
 ifeq ($(SMS),)
 $(info >>> WARNING - no SM architectures have been specified - waiving sample <<<)
@@ -279,6 +279,8 @@ EXEC ?= @echo "[@]"
 endif
 
 ################################################################################
+
+NVCC = nvcc
 
 # Target rules
 all: build
