@@ -40,7 +40,7 @@ void filter2(uint8_t *in, uint8_t *out, int num_pixels)
 
     for (int i = 0; i < num_pixels / 4; i++)
     {
-        //take the 4 r g and b values of each char vector and seperate them into their on int vectors
+        //take the 4 r g and b values of each char vector and separate them into their on int vectors
         vector unsigned int rVector = (vector unsigned int)vec_perm(values[i], zeroVector, rPattern);
         vector unsigned int gVector = (vector unsigned int)vec_perm(values[i], zeroVector, gPattern);
         vector unsigned int bVector = (vector unsigned int)vec_perm(values[i], zeroVector, bPattern);
@@ -69,9 +69,43 @@ void filter2(uint8_t *in, uint8_t *out, int num_pixels)
 
 void filter3(uint8_t *in, uint8_t *out, int num_pixels)
 {
-    (void)in;         /* UNUSED */
-    (void)out;        /* UNUSED */
-    (void)num_pixels; /* UNUSED */
+  vector unsigned char *values = (vector unsigned char *)in;
+  vector unsigned char *outputs = (vector unsigned char *)out;
+
+  for (int i = 0; i < num_pixels / 4; i++)
+  {
+    //take the 4 r g and b values of each char vector and separate them into their on int vectors
+    vector unsigned int rVector = (vector unsigned int)vec_perm(values[i], zeroVector, rPattern);
+    vector unsigned int gVector = (vector unsigned int)vec_perm(values[i], zeroVector, gPattern);
+    vector unsigned int bVector = (vector unsigned int)vec_perm(values[i], zeroVector, bPattern);
+
+    // Find out if red is the dominant color
+    vector bool char r_larger_g = vec_cmpgt(rVector, gVector);
+    vector bool char r_larger_b = vec_cmpgt(rVector, bVector);
+    vector bool char r_largest = vec_and(r_larger_g, r_larger_b);
+    vector bool char r_mask = vec_perm(r_largest, zeroVector, grayPattern);
+
+    //convert the int vectors to float
+    vector float rFloatVector = vec_ctf(rVector, 0);
+    vector float gFloatVector = vec_ctf(gVector, 0);
+    vector float bFloatVector = vec_ctf(bVector, 0);
+
+    //apply rgb to grayscale calculation to each r g and b vector
+    vector float grayFloatVector;
+    grayFloatVector = vec_mul(rFloatVector, rFactor);
+    grayFloatVector = vec_madd(gFloatVector, gFactor, grayFloatVector);
+    grayFloatVector = vec_madd(bFloatVector, bFactor, grayFloatVector);
+
+    //convert the float vectors to int
+    vector unsigned int grayVector = vec_ctu(grayFloatVector, 0);
+
+    //clamp max value at 255
+    grayVector = vec_min(grayVector, maxPattern);
+
+    //reconstruct char array from int r g b vectors
+    vector unsigned char grayOutput = vec_perm((vector unsigned char)grayVector, alphaMask, grayPattern);
+    outputs[i] = vec_sel(grayOutput, outputs[i], r_mask);
+  }
 }
 
 void filter4(uint8_t *in, uint8_t *out, int num_pixels)
