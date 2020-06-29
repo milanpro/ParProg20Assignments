@@ -104,7 +104,7 @@ void filter3(uint8_t *in, uint8_t *out, int num_pixels)
 
     //reconstruct char array from int r g b vectors
     vector unsigned char grayOutput = vec_perm((vector unsigned char)grayVector, alphaMask, grayPattern);
-    outputs[i] = vec_sel(grayOutput, outputs[i], r_mask);
+    outputs[i] = vec_sel(grayOutput, values[i], r_mask);
   }
 }
 
