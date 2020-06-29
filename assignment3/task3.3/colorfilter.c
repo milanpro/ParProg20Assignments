@@ -80,10 +80,10 @@ void filter3(uint8_t *in, uint8_t *out, int num_pixels)
     vector unsigned int bVector = (vector unsigned int)vec_perm(values[i], zeroVector, bPattern);
 
     // Find out if red is the dominant color
-    vector bool char r_larger_g = vec_cmpgt(rVector, gVector);
-    vector bool char r_larger_b = vec_cmpgt(rVector, bVector);
-    vector bool char r_largest = vec_and(r_larger_g, r_larger_b);
-    vector bool char r_mask = vec_perm(r_largest, zeroVector, grayPattern);
+    vector bool int r_larger_g = vec_cmpgt(rVector, gVector);
+    vector bool int r_larger_b = vec_cmpgt(rVector, bVector);
+    vector bool char r_largest = (vector bool char)vec_and(r_larger_g, r_larger_b);
+    vector bool char r_mask = vec_perm(r_largest, (vector bool char)zeroVector, grayPattern);
 
     //convert the int vectors to float
     vector float rFloatVector = vec_ctf(rVector, 0);
