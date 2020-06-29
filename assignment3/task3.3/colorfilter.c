@@ -1,7 +1,9 @@
 #include "bmp.h"
+#include "constants.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <altivec.h>
 
 int is_apt_for_exercise(bmp_t *bmp)
 {
@@ -17,24 +19,48 @@ int is_apt_for_exercise(bmp_t *bmp)
 
 void filter1(uint8_t *in, uint8_t *out, int num_pixels)
 {
-    pixel_t value;
-    int p;
+    vector unsigned char *values = (vector unsigned char *)in;
+    vector unsigned char *outputs = (vector unsigned char *)out;
 
-    for (p = 0; p < num_pixels; p++)
+    for (int p = 0; p < num_pixels / 4; p++)
     {
-        value = ((pixel_t *)in)[p];
-        value.r = 255 - value.r;
-        value.g = 255 - value.g;
-        value.b = 255 - value.b;
-        ((pixel_t *)out)[p] = value;
+        vector unsigned char value = vec_subs(invertMask, values[p]);
+        outputs[p] = value;
     }
 }
 
 void filter2(uint8_t *in, uint8_t *out, int num_pixels)
 {
-    (void)in;         /* UNUSED */
-    (void)out;        /* UNUSED */
-    (void)num_pixels; /* UNUSED */
+    vector unsigned char *values = (vector unsigned char *)in;
+    vector unsigned char *outputs = (vector unsigned char *)out;
+
+    for (int i = 0; i < num_pixels / 4; i++)
+    {
+        //take the 4 r g and b values of each char vector and seperate them into their on int vectors
+        vector unsigned int rVector = (vector unsigned int)vec_perm(values[i], zeroVector, rPattern);
+        vector unsigned int gVector = (vector unsigned int)vec_perm(values[i], zeroVector, gPattern);
+        vector unsigned int bVector = (vector unsigned int)vec_perm(values[i], zeroVector, bPattern);
+
+        //convert the int vectors to float
+        vector float rFloatVector = vec_ctf(rVector, 0);
+        vector float gFloatVector = vec_ctf(gVector, 0);
+        vector float bFloatVector = vec_ctf(bVector, 0);
+
+        //apply rgb to grayscale calculation to each r g and b vector
+        vector float grayFloatVector;
+        grayFloatVector = vec_mul(rFloatVector, rFactor);
+        grayFloatVector = vec_madd(gFloatVector, gFactor, grayFloatVector);
+        grayFloatVector = vec_madd(bFloatVector, bFactor, grayFloatVector);
+
+        //convert the float vectors to int
+        vector unsigned int grayVector = vec_ctu(grayFloatVector, 0);
+
+        //clamp max value at 255
+        grayVector = vec_min(grayVector, maxPattern);
+
+        //reconstruct char array from int r g b vectors
+        outputs[i] = vec_perm((vector unsigned char)grayVector, alphaMask, grayPattern);
+    }
 }
 
 void filter3(uint8_t *in, uint8_t *out, int num_pixels)
