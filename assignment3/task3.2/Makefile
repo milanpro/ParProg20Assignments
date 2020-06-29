@@ -280,12 +280,10 @@ endif
 
 ################################################################################
 
-NVCC = nvcc
-
 # Target rules
 all: build
 
-build: parsum
+build: heatmap
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -294,22 +292,19 @@ else
 	@echo "Sample is ready - all dependencies have been met"
 endif
 
-parsum.o: parsum.cu
+csv.o: csv.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-parsum: parsum.o
-	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
-    
-parsum2.o: parsum2.cu
+heatmap.o: heatmap.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-parsum2: parsum2.o
+heatmap: heatmap.o csv.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
 run: build
-	$(EXEC) ./parsum
+	$(EXEC) ./heatmap
 
 clean:
-	rm -f parsum parsum.o
+	rm -f heatmap heatmap.o
 
 clobber: clean
