@@ -176,6 +176,15 @@ int main(int argc, char const *argv[])
     printf("Round: %d/%d starting...\n", i, rounds);
 
     worker<<< gridSize, blockSize, 0, stream >>>(src, dest, width, height);
+    
+    cudaError_t err = cudaGetLastError();
+    const char* error = cudaGetErrorString(err);
+    printf("%s\n", error);
+
+    if (err != cudaSuccess) {
+      return err;
+    }
+
     cudaStreamSynchronize(stream);
 
     printf("Round: %d/%d done\n", i, rounds);
