@@ -25,6 +25,8 @@ void filter1(uint8_t *in, uint8_t *out, int num_pixels)
     for (int p = 0; p < num_pixels / 4; p++)
     {
         vector unsigned char value = vec_subs(invertMask, values[p]);
+        value = vec_perm(value, values[p], alphaPattern);
+        
         outputs[p] = value;
     }
 }
