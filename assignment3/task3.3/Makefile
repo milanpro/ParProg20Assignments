@@ -3,7 +3,7 @@ TARGET = colorfilter
 CFLAGS = -Wall -Wextra -std=c11
 
 HDR = bmp.h
-SRC = bmp.c main.c
+SRC = bmp.c colorfilter.c
 OBJ = $(SRC:%.c=%.o)
 DEP = $(SRC:%.c=%.d)
 
