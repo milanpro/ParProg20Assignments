@@ -6,6 +6,11 @@ vector unsigned char invertMask = {255, 255, 255, 0,
                                    255, 255, 255, 0,
                                    255, 255, 255, 0};
 
+vector unsigned char invertRMask = {255, 0, 255, 0,
+                                    255, 0, 255, 0,
+                                    255, 0, 255, 0,
+                                    255, 0, 255, 0};
+
 vector unsigned char alphaPattern = {0x00, 0x01, 0x02, 0x13,
                                      0x04, 0x05, 0x06, 0x17,
                                      0x08, 0x09, 0x0a, 0x1b,
