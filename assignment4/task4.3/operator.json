@@ -1,0 +1,5 @@
+{
+  "main": "colorfilter",
+  "description": "Convert a bitmap to grayscale except red-dominant pixels",
+  "options": {}
+}

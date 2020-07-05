@@ -1,0 +1,8 @@
+{
+  "main": "heatmap",
+  "description": "Perform a single round of the heatmap simulation",
+  "options": {},
+  "devImage": {
+    "streamBytes": 64
+  }
+}
