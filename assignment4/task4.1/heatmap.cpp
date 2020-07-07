@@ -49,27 +49,36 @@ void heatmap(mtl_stream &in, mtl_stream &out) {
   // TODO: Place your single-round heatmap implementation here
   mtl_stream_data dummy = 0;
 
-  mtl_stream_element first = in.read();
-  mtl_stream_element second = in.read();
-  mtl_stream_element third = in.read();
+  mtl_stream_element element = in.read();
 
-  mtl_stream_data result_first = compute_row(dummy, first.data, second.data);
-  mtl_stream_data result_second = compute_row(first.data, second.data, third.data);
-  mtl_stream_data result_third = compute_row(second.data, third.data, dummy);
+  mtl_stream_data first = dummy;
+  mtl_stream_data second = element.data;
+  mtl_stream_data third = dummy;
 
-  mtl_stream_element output;
+  mtl_stream_data result;
+  bool is_last = element.last;
 
-  output.data = result_first;
-  output.last = false;
-  out.write(output);
+  while (!is_last) {
+    element = in.read();
 
-  output.data = result_second;
-  output.last = false;
-  out.write(output);
+    third = element.data;
+    is_last = element.last;
 
-  output.data = result_third;
-  output.last = true;
-  out.write(output);
+    result = compute_row(first, second, third);
+    element.data = result;
+    element.last = false;
+    out.write(element);
+
+    first = second;
+    second = third;
+    third = dummy;
+  }
+
+  // Also works if there is only one row
+  result = compute_row(first, second, third);
+  element.data = result;
+  element.last = true;
+  out.write(element);
 }
 
 
