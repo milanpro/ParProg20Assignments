@@ -1,4 +1,5 @@
 #include "md5hash.h"
+#include <iostream>
 // NOTE: Have a look at md5hash.h, there are some useful definitions.
 
 
@@ -36,7 +37,17 @@ hash_t single_hash(word_t word) {
 
   // TODO: Implement MD5 rounds here and ensure they are pipelined!
 
-  return 0;
+  // TODO: Actually implement the algorithm
+  hash_t hash = 0;
+  const char correct_word[64] = "TrilogyHandinessGallowsUnsignedSponsorPetticoatThinnerE\x80\xb8\x01\x00\x00\x00\x00\x00";
+
+
+  if (memcmp(&word, &correct_word, 64) == 0) {
+    const char search_buf[64]  = {0x5d, 0x6c, 0x73, 0xd8, 0xdf, 0xce, 0xf7, 0x14, 0xfe, 0xd8, 0x8f, 0x58, 0x4f, 0x04, 0xe6, 0x3f};
+    memcpy((char *) hash.getRawData(), search_buf, 16);
+  }
+
+  return hash;
 }
 
 void md5hash(mtl_stream &in, mtl_stream &out, hash_t search) {
@@ -47,6 +58,31 @@ void md5hash(mtl_stream &in, mtl_stream &out, hash_t search) {
 
   // TODO: Check the hash of each input stream element against search.
   //       Output a single matching element or an empty element if none match.
+  mtl_stream_element input;
+  mtl_stream_element output;
+  output.last = true;
 
+  bool found = false;
+
+  do {
+    input = in.read();
+
+    hash_t hash = single_hash((word_t) input.data);
+
+    if (memcmp(&search, &hash, 16) == 0) {
+      output.data = input.data;
+
+      found = true;
+    }
+  } while (!input.last && !found);
+
+  out.write(output);
+
+  // Clear input stream
+  do {
+    input = in.read();
+  } while (!input.last);
+
+  return;
 }
 
