@@ -2,9 +2,11 @@
 // NOTE: Have a look at heatmap.h, there are some useful definitions.
 
 mtl_stream_data compute_row(mtl_stream_data first, mtl_stream_data second, mtl_stream_data third) {
+#pragma HLS INLINE
   mtl_stream_data result = 0;
 
   for (int j=0; j < ROW_CELLS; j++) {
+#pragma HLS UNROLL
     mtl_stream_data left_top = 0;
     mtl_stream_data left_center = 0;
     mtl_stream_data left_bottom = 0;
