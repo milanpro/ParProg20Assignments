@@ -79,9 +79,9 @@ void md5hash(mtl_stream &in, mtl_stream &out, hash_t search) {
   out.write(output);
 
   // Clear input stream
-  do {
+  while (!input.last) {
     input = in.read();
-  } while (!input.last);
+  }
 
   return;
 }
