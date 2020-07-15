@@ -60,6 +60,7 @@ void md5hash(mtl_stream &in, mtl_stream &out, hash_t search) {
   //       Output a single matching element or an empty element if none match.
   mtl_stream_element input;
   mtl_stream_element output;
+  output.keep = (mtl_stream_keep) -1;
   output.last = true;
 
   bool found = false;

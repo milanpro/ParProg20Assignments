@@ -68,6 +68,7 @@ void heatmap(mtl_stream &in, mtl_stream &out) {
 
     result = compute_row(first, second, third);
     element.data = result;
+    element.keep = (mtl_stream_keep) -1;
     element.last = false;
     out.write(element);
 
@@ -79,6 +80,7 @@ void heatmap(mtl_stream &in, mtl_stream &out) {
   // Also works if there is only one row
   result = compute_row(first, second, third);
   element.data = result;
+  element.keep = (mtl_stream_keep) -1;
   element.last = true;
   out.write(element);
 }
