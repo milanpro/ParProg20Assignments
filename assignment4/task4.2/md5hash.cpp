@@ -34,18 +34,64 @@ const unit_t K[ITERATION_RANGE] = {
   0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391 };
 
 hash_t single_hash(word_t word) {
+#pragma HLS INLINE
 
   // TODO: Implement MD5 rounds here and ensure they are pipelined!
 
   // TODO: Actually implement the algorithm
-  hash_t hash = 0;
-  const char correct_word[64] = "TrilogyHandinessGallowsUnsignedSponsorPetticoatThinnerE\x80\xb8\x01\x00\x00\x00\x00\x00";
+  unit_t a0 = 0x67452301;
+  unit_t b0 = 0xefcdab89;
+  unit_t c0 = 0x98badcfe;
+  unit_t d0 = 0x10325476;
 
+  unit_t A = a0;
+  unit_t B = b0;
+  unit_t C = c0;
+  unit_t D = d0;
 
-  if (memcmp(&word, &correct_word, 64) == 0) {
-    const char search_buf[64]  = {0x5d, 0x6c, 0x73, 0xd8, 0xdf, 0xce, 0xf7, 0x14, 0xfe, 0xd8, 0x8f, 0x58, 0x4f, 0x04, 0xe6, 0x3f};
-    memcpy((char *) hash.getRawData(), search_buf, 16);
+  unit_t M[16];
+
+  for (int i = 0; i < 16; i++){
+#pragma HLS UNROLL
+    M[i] = EXTRACT_UNIT(word, i);
   }
+
+  for (iteration_ctr_t i = 0; i < ITERATION_RANGE; i++){
+#pragma HLS PIPELINE
+    unit_t F;
+    word_index_t g = G[i];
+
+    if (i < 16){
+      F = (B & C) | ((~B) & D);
+    }
+    else if (i < 32){
+      F = (D & B) | ((~D) & C);
+    }
+    else if (i < 48){
+      F = B ^ C ^ D;
+    }
+    else {
+      F = C ^ (B | (~D));
+    }
+
+    F = F + A + K[i] + M[g];
+    A = D;
+    D = C;
+    C = B;
+    B = B + ((F << S[i]) | (F >> (32 - S[i])));
+  }
+
+  a0 = a0 + A;
+  b0 = b0 + B;
+  c0 = c0 + C;
+  d0 = d0 + D;
+
+  hash_t hash = 0;
+
+  EXTRACT_UNIT(hash, 0) = a0;
+  EXTRACT_UNIT(hash, 1) = b0;
+  EXTRACT_UNIT(hash, 2) = c0;
+  EXTRACT_UNIT(hash, 3) = d0;
 
   return hash;
 }
@@ -60,17 +106,19 @@ void md5hash(mtl_stream &in, mtl_stream &out, hash_t search) {
   //       Output a single matching element or an empty element if none match.
   mtl_stream_element input;
   mtl_stream_element output;
+  output.data = 0;
   output.keep = (mtl_stream_keep) -1;
   output.last = true;
 
   bool found = false;
 
   do {
+
     input = in.read();
 
     hash_t hash = single_hash((word_t) input.data);
 
-    if (memcmp(&search, &hash, 16) == 0) {
+    if (hash == search) {
       output.data = input.data;
 
       found = true;
