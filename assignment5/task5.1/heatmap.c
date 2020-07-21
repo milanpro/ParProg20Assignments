@@ -21,34 +21,48 @@ struct hotspot *hotspot_list;
 int start_x;
 int start_y;
 int count;
+int *all_counts = NULL;
+int *all_disp = NULL;
 
 void assign_ranges()
 {
-  if (rank == SERVER_RANK) {
+  if (rank == SERVER_RANK)
+  {
     int x = 0, y = 0;
     int current = 0;
     int total = width * height;
-    
+
+    all_counts = calloc(size, sizeof(int));
+    all_disp = calloc(size, sizeof(int));
+
     for (int i = 0; i < size; i++)
     {
-      int step = (int) ((double)(total - current) / (double)(size - i));
-      
-      if (i != SERVER_RANK) {
+      int step = (int)((double)(total - current) / (double)(size - i));
+
+      all_counts[i] = step;
+      all_disp[i] = width * y + x;
+
+      if (i != SERVER_RANK)
+      {
         MPI_Send(&x, 1, MPI_INT, i, 10, MPI_COMM_WORLD);
         MPI_Send(&y, 1, MPI_INT, i, 10, MPI_COMM_WORLD);
         MPI_Send(&step, 1, MPI_INT, i, 10, MPI_COMM_WORLD);
-      } else {
+      }
+      else
+      {
         start_x = x;
         start_y = y;
         count = step;
       }
-      
+
       current += step;
 
       y += (x + step) / width;
       x = (x + step) % width;
     }
-  } else {
+  }
+  else
+  {
     MPI_Recv(&start_x, 1, MPI_INT, SERVER_RANK, 10, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     MPI_Recv(&start_y, 1, MPI_INT, SERVER_RANK, 10, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     MPI_Recv(&count, 1, MPI_INT, SERVER_RANK, 10, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -208,7 +222,8 @@ int main(int argc, char *argv[])
   src = calloc(width * height, sizeof(double));
   dest = calloc(width * height, sizeof(double));
 
-  if (rank == SERVER_RANK) {
+  if (rank == SERVER_RANK)
+  {
     hotspot_list = parse_hotspot_list(hotspots_filename);
     set_hotspots(0);
   }
@@ -220,18 +235,22 @@ int main(int argc, char *argv[])
   for (int i = 0; i < rounds; i++)
   {
     MPI_Bcast(src, width * height, MPI_DOUBLE, SERVER_RANK, MPI_COMM_WORLD);
-    if (rank == SERVER_RANK) {
+    if (rank == SERVER_RANK)
+    {
       printf("Round: %d/%d starting...\n", i, rounds);
     }
     worker();
 
-    if (rank == SERVER_RANK) {
+    if (rank == SERVER_RANK)
+    {
       printf("Round: %d/%d done\n", i, rounds);
     }
 
-    MPI_Gather(&(dest[width * start_y + start_x]), count, MPI_DOUBLE, dest, count, MPI_DOUBLE, SERVER_RANK, MPI_COMM_WORLD );
+    //MPI_Gather(&(dest[width * start_y + start_x]), count, MPI_DOUBLE, dest, count, MPI_DOUBLE, SERVER_RANK, MPI_COMM_WORLD);
+    MPI_Gatherv(&(dest[width * start_y + start_x]), count, MPI_DOUBLE, dest, all_counts, all_disp, MPI_DOUBLE, SERVER_RANK, MPI_COMM_WORLD);
     //Swapping src into dest and the other way round
-    if (rank == SERVER_RANK) {
+    if (rank == SERVER_RANK)
+    {
       double *temp = dest;
       dest = src;
       src = temp;
@@ -239,7 +258,8 @@ int main(int argc, char *argv[])
     }
   }
 
-  if (rank == SERVER_RANK) {
+  if (rank == SERVER_RANK)
+  {
     if (coords_filename != NULL)
     {
       write_results_coords(coords_filename);
