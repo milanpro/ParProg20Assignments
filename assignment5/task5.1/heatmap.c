@@ -34,9 +34,9 @@ void assign_ranges()
       int step = (int) ((double)(total - current) / (double)(size - i));
       
       if (i != SERVER_RANK) {
-        MPI_Send(&x, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD);
-        MPI_Send(&y, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD);
-        MPI_Send(&step, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD);
+        MPI_Send(&x, 1, MPI_INT, i, 10, MPI_COMM_WORLD);
+        MPI_Send(&y, 1, MPI_INT, i, 10, MPI_COMM_WORLD);
+        MPI_Send(&step, 1, MPI_INT, i, 10, MPI_COMM_WORLD);
       } else {
         start_x = x;
         start_y = y;
@@ -49,9 +49,9 @@ void assign_ranges()
       x = (x + step) % width;
     }
   } else {
-    MPI_Recv(&start_x, 1, MPI_INT, SERVER_RANK, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&start_y, 1, MPI_INT, SERVER_RANK, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(&count, 1, MPI_INT, SERVER_RANK, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Recv(&start_x, 1, MPI_INT, SERVER_RANK, 10, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Recv(&start_y, 1, MPI_INT, SERVER_RANK, 10, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Recv(&count, 1, MPI_INT, SERVER_RANK, 10, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
 }
 
@@ -141,7 +141,7 @@ void compute_point(int x_coord, int y_coord)
 
 void worker()
 {
-  printf("Calculating as rank %d", rank);
+  printf("Calculating as rank %d\n", rank);
   int col = start_x;
   int row = start_y;
 
@@ -216,6 +216,7 @@ int main(int argc, char *argv[])
   printf("Assigning ranges for rank %d...\n", rank);
   assign_ranges();
   printf("start_x: %d, start_y: %d, count: %d\n", start_x, start_y, count);
+
   for (int i = 0; i < rounds; i++)
   {
     MPI_Bcast(src, width * height, MPI_DOUBLE, SERVER_RANK, MPI_COMM_WORLD);
@@ -228,7 +229,7 @@ int main(int argc, char *argv[])
       printf("Round: %d/%d done\n", i, rounds);
     }
 
-    MPI_Gather(dest, count, MPI_DOUBLE, dest, width*height, MPI_DOUBLE, SERVER_RANK, MPI_COMM_WORLD );
+    MPI_Gather(&(dest[width * start_y + start_x]), count, MPI_DOUBLE, dest, count, MPI_DOUBLE, SERVER_RANK, MPI_COMM_WORLD );
     //Swapping src into dest and the other way round
     if (rank == SERVER_RANK) {
       double *temp = dest;

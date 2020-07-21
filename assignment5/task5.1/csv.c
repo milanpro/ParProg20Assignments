@@ -53,6 +53,7 @@ struct hotspot *parse_hotspot_list(const char *hotspots_filename)
     if (line)
         free(line);
 
+    last_hotspot->next_hotspot = NULL;
     return hotspot_list;
 }
 
@@ -104,5 +105,6 @@ struct coord *read_coords(const char *coords_filename)
     if (line)
         free(line);
 
+    last_coord->next_coord = NULL;
     return coord_list;
 }
