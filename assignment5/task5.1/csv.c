@@ -59,7 +59,7 @@ struct hotspot *parse_hotspot_list(const char *hotspots_filename)
 
 struct coord *read_coords(const char *coords_filename)
 {
-    struct coord *coord_list;
+    struct coord *coord_list = NULL;
 
     FILE *fp;
     fp = fopen(coords_filename, "r");

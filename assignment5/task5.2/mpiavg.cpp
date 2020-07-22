@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     }
 
     std::vector<double> numbers;
-    int number_count, number_range;
+    int number_count = 0, number_range = 0;
 
     if (IS_INT_ROOT)
     {
@@ -138,10 +138,9 @@ int main(int argc, char *argv[])
 
     MPI_Reduce(&process_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, sub_communicator);
 
-    double average = global_sum / number_count;
-
     if (IS_INT_ROOT)
     {
+        double average = global_sum / number_count;
         std::cout << average << std::endl;
     }
 
@@ -149,6 +148,7 @@ int main(int argc, char *argv[])
 
     if (IS_DOUBLE_ROOT)
     {
+        double average = global_sum / number_count;
         std::cout << average << std::endl;
     }
 
